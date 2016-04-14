@@ -120,8 +120,7 @@ public class SimpleItemRecyclerViewAdapter
 
 	public class ViewHolder extends RecyclerView.ViewHolder {
 		public final View mView;
-		public final TextView mIdView;
-		public final TextView mContentView;
+		public final TextView mIdView, mContentView;
 		public DummyContent.DummyItem mItem;
 
 		public ViewHolder(View view) {
