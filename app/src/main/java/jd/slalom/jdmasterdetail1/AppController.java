@@ -8,7 +8,7 @@ import com.android.volley.toolbox.ImageLoader;
 
 import static com.android.volley.toolbox.Volley.newRequestQueue;
 
-class AppController extends Application{
+public class AppController extends Application{
 
 public static final String TAG = AppController.class.getSimpleName();
 
