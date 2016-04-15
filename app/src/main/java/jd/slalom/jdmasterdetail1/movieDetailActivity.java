@@ -48,13 +48,9 @@ protected void onCreate(Bundle savedInstanceState) {
 	// http://developer.android.com/guide/components/fragments.html
 	//
 	if (savedInstanceState == null) {
-		// Create the detail fragment and add it to the activity
-		// using a fragment transaction.
-		Bundle arguments = new Bundle();
-		arguments.putString(movieDetailFragment.ARG_ITEM_ID,
-				getIntent().getStringExtra(movieDetailFragment.ARG_ITEM_ID));
+		// Create the detail fragment and add it to the activity using a fragment transaction.
 		movieDetailFragment fragment = new movieDetailFragment();
-		fragment.setArguments(arguments);
+		fragment.setArguments( getIntent().getExtras() );//bundle
 		getSupportFragmentManager().beginTransaction()
 				.add(R.id.movie_detail_container, fragment)
 				.commit();

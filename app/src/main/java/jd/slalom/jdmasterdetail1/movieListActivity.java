@@ -12,8 +12,13 @@ import android.view.*;
 import android.widget.*;
 
 import com.android.volley.Response;
+import com.android.volley.Response.Listener;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -45,6 +50,7 @@ private List<Movie> mMovieList = new ArrayList<>();
 private MovieAdapter mMovieAdapter;
 private Button btnDel, btnLoad;
 private android.app.ProgressDialog progress;
+private RecyclerView recyclerView;
 
 @Override protected void onCreate(Bundle savedInstanceState){
 	super.onCreate(savedInstanceState);
@@ -62,11 +68,11 @@ private android.app.ProgressDialog progress;
 		}//onClick
 	});
 
-	View recyclerView = findViewById(R.id.movie_list);
+	recyclerView = (RecyclerView)findViewById(R.id.movie_list);
 //	assert recyclerView != null;
 
 	mMovieAdapter = new MovieAdapter(this, mMovieList);
-	((RecyclerView)recyclerView).setAdapter( mMovieAdapter );
+	recyclerView.setAdapter( mMovieAdapter );
 	//setupRecyclerView((RecyclerView) recyclerView);
 
 // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
@@ -88,9 +94,6 @@ private android.app.ProgressDialog progress;
 	});
 
 }//onCreate
-
-//private void setupRecyclerView(@NonNull RecyclerView recyclerView){ recyclerView.setAdapter(new MovieAdapter(this, mMovieList)); }//setupRecyclerView
-
 
 private boolean isEmpty(){
 	if (mMovieList.isEmpty()) {
@@ -123,12 +126,10 @@ private boolean isEmpty(){
 
 private void clearProgress() { if (progress != null) { progress.dismiss(); } }
 
-/*
-@Override public boolean onCreateOptionsMenu(Menu menu) {
+/* @Override public boolean onCreateOptionsMenu(Menu menu){
 	getMenuInflater().inflate(R.menu.main, menu);
 return true;
-}
-*/
+} */
 
 @Override protected void onStop(){
 	super.onStop();
@@ -155,31 +156,31 @@ progress.show();
 final JSONObject GET = null;
 JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        new Response.Listener<JSONObject>() {
+       //new Listener<JsonObject>() {
            public void onResponse(JSONObject response) {
+          // public void onResponse(JsonObject response) {
                mLog.debug("onResponse:\t" + response.toString());
 	           mMovieList.clear();
                int numMovies = 0;
-               try {//to view JSON use http://codebeautify.org/jsonviewer#
-                   org.json.JSONArray moviesArr = response.getJSONArray("movies");
-
+               try {
+	               //to view JSON use http://codebeautify.org/jsonviewer#
+	               JSONArray moviesArr = response.getJSONArray("movies");
                    //"Log the JSON to the console."
                    mLog.trace("JSON:\t" + moviesArr.toString());
 
                    numMovies = moviesArr.length();
-                   for (int j = 0; j < numMovies; j++) {
-                       JSONObject JSON = moviesArr.getJSONObject(j);
+                   for (int i = 0; i < numMovies; i++) {
+                       //JSONObject JSON = moviesArr.getJSONObject(i);
 
                        //mLog.debug("JSON:\t" + JSON.toString());
-                       Movie movie = new Movie(JSON);
-
-	                   mMovieList.add(movie);
+                       //Movie movie = new Movie(JSON);
+	                   //new Movie(JSON)
+	                   //JsonObject x =  moviesArr.getJSONObject(j);
+	                   mMovieList.add( Movie.fromJson( moviesArr.getJSONObject(i) ) );
                    }//for
                }//try
-               catch (JSONException X) {
-                   mLog.error("onResponse:\t" + X.getMessage());
-               }
+               catch (JSONException X) { mLog.error("onResponse:\t" + X.getMessage()); }
 
-               //}//for
 
 	           mMovieAdapter.notifyDataSetChanged();
                if (!isEmpty()) {
@@ -205,6 +206,7 @@ clearProgress();
 );//JsonObjectRequest
 
 AppController.getInstance().addToRequestQueue(request);
+
 }//btnLoadClicked
 
 public void btnDelClicked(View view) {
