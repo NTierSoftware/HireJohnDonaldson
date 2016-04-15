@@ -83,7 +83,7 @@ private RecyclerView recyclerView;
 	FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 	fab.setOnClickListener(new View.OnClickListener(){
 		@Override public void onClick(View view){
-			Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+			Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_SHORT)
 					.setAction("Action", null).show();
 		}//onClick
 	});
@@ -174,13 +174,12 @@ final JSONObject GET = null;
 JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        new Response.Listener<JSONObject>() {
            public void onResponse(JSONObject response) {
-               mLog.debug("onResponse:\t" + response.toString());
+               //mLog.debug("onResponse:\t" + response.toString());
                int numMovies;
-               try {
-	               //to view JSON use http://codebeautify.org/jsonviewer#
+               try{ //to view JSON use http://codebeautify.org/jsonviewer#
 	               JSONArray moviesArr = response.getJSONArray("movies");
                    //"Log the JSON to the console."
-                   mLog.trace("JSON:\t" + moviesArr.toString());
+                   mLog.info("JSON:\t" + moviesArr.toString());
 
                    numMovies = moviesArr.length();
 	               mMovieList.clear();
