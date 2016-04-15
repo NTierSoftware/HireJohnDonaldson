@@ -108,26 +108,21 @@ private RecyclerView recyclerView;
 		}
 	});
 
+	btnLoadClicked(null);
 }//onCreate
 
 private boolean isEmpty(){
 	if (mMovieList.isEmpty()) {
 		btnDel.setVisibility(View.INVISIBLE);
-        //btnDel.setClickable(false);
-		//btnDel.setEnabled(false);
 
 		makeText(this,
 				getResources().getString(R.string.emptyList),
 				LENGTH_SHORT).show();
 
 		btnLoad.setVisibility(View.VISIBLE);
-		//btnLoad.setClickable(true);
-		//btnLoad.setEnabled(true);
 		return true;
 	}
 	btnDel.setVisibility(View.VISIBLE);
-//	btnDel.setEnabled(true);
-//	btnDel.setClickable(true);
 return false;
 }
 
@@ -194,11 +189,8 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
 
 
 	           mMovieAdapter.notifyDataSetChanged();
-               if (!isEmpty()) {
-	               btnLoad.setVisibility(android.view.View.INVISIBLE);
-                   //btnLoad.setEnabled(false);
-                   //btnLoad.setClickable(false);
-               }
+               if (!isEmpty()) { btnLoad.setVisibility(android.view.View.INVISIBLE); }
+
                clearProgress();
                makeText(toastActivity,
                        Integer.toString(numMovies) + " movies loaded.",
@@ -208,13 +200,13 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        }//Listener
 
        ,new Response.ErrorListener() {
-		@Override public void onErrorResponse (com.android.volley.VolleyError X){
-		mLog.error("\nonErrorResponse\n");
-		X.printStackTrace();
-		clearProgress();
-		}//onErrorResponse
+			@Override public void onErrorResponse (com.android.volley.VolleyError X){
+				mLog.error("\nonErrorResponse\n");
+				X.printStackTrace();
+				clearProgress();
+			}//onErrorResponse
 		}//ErrorListener
-		);//JsonObjectRequest
+	);//JsonObjectRequest
 
 
 	AppController.getInstance().addToRequestQueue(request);
@@ -222,8 +214,6 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
 
 public void btnDelClicked(View view) {
 	btnLoad.setVisibility(View.VISIBLE);
-	//btnLoad.setClickable(true);
-	//btnLoad.setEnabled(true);
 
 	if ( isEmpty() ) return;
 
