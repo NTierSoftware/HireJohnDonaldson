@@ -47,7 +47,7 @@ return new ViewHolder(view);
 		@Override public void onClick(View v){
 			if (mActivity.mTwoPane) {
 				Bundle bundle = new Bundle();
-				bundle.putParcelable( Movie.class.getSimpleName(), holder.mItem );
+				bundle.putParcelable( Movie.parcelKey, holder.mItem );
 
 				movieDetailFragment fragment = new movieDetailFragment();
 				fragment.setArguments( bundle );
@@ -58,7 +58,7 @@ return new ViewHolder(view);
 			else {
 				Context context = v.getContext();
 				Intent intent = new Intent(context, movieDetailActivity.class)
-						                .putExtra( Movie.class.getSimpleName(), holder.mItem );
+						                .putExtra( Movie.parcelKey, holder.mItem );
 
 				context.startActivity(intent);
 			}//else

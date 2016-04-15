@@ -1,5 +1,6 @@
 // Author: John "JD" Donaldson, April 2016
 // Resume: https://drive.google.com/open?id=1Pzf7oeqrpIEmzb0ZU3aRPRkRh9Us3ge0AkfsbUer3KM
+// modified from Android Studio Master Detail template
 
 /* MOBILE CODE CHALLENGE
 		You're free to use any resource (internet / libraries / etc), but try to use as much native code as possible (Java for Android, Swift/Objective-C for iOS).
@@ -164,13 +165,16 @@ return true;
 	//mUtility.close();
 }
 
+
 static private final String HTTPURL = "http://private-05248-rottentomatoes.apiary-mock.com/";
+static private final JSONObject GET = null;
+
 public void btnLoadClicked(View view){
 final Activity toastActivity = this;
 //mLog.debug("btnLoadClicked");
 progress.setMessage("Loading. . .");
 progress.show();
-final JSONObject GET = null;
+
 JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        new Response.Listener<JSONObject>() {
            public void onResponse(JSONObject response) {

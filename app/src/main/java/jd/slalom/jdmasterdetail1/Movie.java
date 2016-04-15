@@ -8,6 +8,7 @@ import org.json.*;
 
 class Movie implements Parcelable{
 //static final Logger mLog = org.slf4j.LoggerFactory.getLogger(Movie.class);
+static public final String parcelKey = Movie.class.getSimpleName();
 
 static private int idcounter = 0;
 

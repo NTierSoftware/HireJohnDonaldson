@@ -25,7 +25,7 @@ super.onCreate(savedInstanceState);
 	Bundle bundle = getActivity().getIntent().getExtras();
 	if (bundle == null ) bundle = getArguments();
 
-	mItem = (Movie)bundle.getParcelable(Movie.class.getSimpleName());
+	mItem = (Movie)bundle.getParcelable( Movie.parcelKey );
 
 	CollapsingToolbarLayout appBarLayout =
 			(CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout);
@@ -37,8 +37,18 @@ public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle s
 	View rootView = inflater.inflate(R.layout.movie_detail, container, false);
 
 	// Show the movie content as text in a TextView.
-	if (mItem != null)
-	{ ( (TextView) rootView.findViewById(R.id.movie_detail)).setText(mItem.description); }
+	if (mItem != null){
+		com.android.volley.toolbox.ImageLoader mImageLoader = AppController.getInstance().getImageLoader();
+
+		((com.android.volley.toolbox.NetworkImageView) rootView.findViewById(R.id.image_url))
+				.setImageUrl(mItem.image_url, mImageLoader);
+
+
+		//( (TextView) rootView.findViewById(R.id.movie_name)).setText(mItem.movie_name);
+		( (TextView) rootView.findViewById(R.id.rating)).setText("Rating: " + Double.toString(mItem.rating));
+		( (TextView) rootView.findViewById(R.id.description)).setText(mItem.description);
+		( (TextView) rootView.findViewById(R.id.movie_id)).setText("id: " + mItem.id);
+	}
 
 return rootView;
 }//onCreateView

@@ -1,3 +1,7 @@
+// Author: John "JD" Donaldson, April 2016
+// Resume: https://drive.google.com/open?id=1Pzf7oeqrpIEmzb0ZU3aRPRkRh9Us3ge0AkfsbUer3KM
+// modified from Android Studio Master Detail template
+
 package jd.slalom.jdmasterdetail1;
 
 import android.content.Intent;
@@ -16,19 +20,18 @@ import android.view.MenuItem;
  * item details are presented side-by-side with a list of items
  * in a {@link movieListActivity}.
  */
-public class movieDetailActivity extends AppCompatActivity {
+public class movieDetailActivity extends AppCompatActivity{
 
-@Override
-protected void onCreate(Bundle savedInstanceState) {
+@Override protected void onCreate(Bundle savedInstanceState){
 	super.onCreate(savedInstanceState);
 	setContentView(R.layout.activity_movie_detail);
 	Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
 	setSupportActionBar(toolbar);
 
 	FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-	fab.setOnClickListener(new View.OnClickListener() {
+	fab.setOnClickListener(new View.OnClickListener(){
 		@Override
-		public void onClick(View view) {
+		public void onClick(View view){
 			Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
 					.setAction("Action", null).show();
 		}
@@ -38,15 +41,10 @@ protected void onCreate(Bundle savedInstanceState) {
 	ActionBar actionBar = getSupportActionBar();
 	if (actionBar != null) { actionBar.setDisplayHomeAsUpEnabled(true); }
 
-	// savedInstanceState is non-null when there is fragment state
-	// saved from previous configurations of this activity
-	// (e.g. when rotating the screen from portrait to landscape).
-	// In this case, the fragment will automatically be re-added
-	// to its container so we don't need to manually add it.
-	// For more information, see the Fragments API guide at:
-	//
-	// http://developer.android.com/guide/components/fragments.html
-	//
+// savedInstanceState is non-null when there is fragment state saved from previous configurations of this activity
+// (e.g. when rotating the screen from portrait to landscape). In this case, the fragment will automatically be re-added
+// to its container so we don't need to manually add it.
+// http://developer.android.com/guide/components/fragments.html
 	if (savedInstanceState == null) {
 		// Create the detail fragment and add it to the activity using a fragment transaction.
 		movieDetailFragment fragment = new movieDetailFragment();
@@ -57,10 +55,9 @@ protected void onCreate(Bundle savedInstanceState) {
 	}
 }
 
-@Override
-public boolean onOptionsItemSelected(MenuItem item) {
+@Override public boolean onOptionsItemSelected(MenuItem item){
 	int id = item.getItemId();
-	if (id == android.R.id.home) {
+	if (id == android.R.id.home){
 		// This ID represents the Home or Up button. In the case of this
 		// activity, the Up button is shown. For
 		// more details, see the Navigation pattern on Android Design:
@@ -70,6 +67,6 @@ public boolean onOptionsItemSelected(MenuItem item) {
 		navigateUpTo(new Intent(this, movieListActivity.class));
 		return true;
 	}
-	return super.onOptionsItemSelected(item);
+return super.onOptionsItemSelected(item);
 }
 }

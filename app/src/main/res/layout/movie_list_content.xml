@@ -22,14 +22,6 @@
         android:textSize="@dimen/movie_name"
         android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/rating"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/movie_name"
-        android:layout_marginTop="1dip"
-        android:layout_toRightOf="@+id/image_url"
-        android:textSize="@dimen/rating" />
 
 </RelativeLayout>
 

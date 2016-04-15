@@ -5,7 +5,6 @@ import android.app.Application;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 
-
 import static com.android.volley.toolbox.Volley.newRequestQueue;
 
 public class AppController extends Application{
