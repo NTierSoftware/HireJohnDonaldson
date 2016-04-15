@@ -97,7 +97,7 @@ private RecyclerView recyclerView;
 	btnLoad = (Button) findViewById(R.id.btnLoad);
 	progress = new android.app.ProgressDialog(this);
 	btnDel = (Button) findViewById(R.id.btnDel);
-	btnDel.setOnLongClickListener(new android.view.View.OnLongClickListener() {
+	btnDel.setOnLongClickListener(new View.OnLongClickListener() {
 		@Override public boolean onLongClick(View v){
 			if (!isEmpty()) {
 				mMovieList.clear();
@@ -112,18 +112,22 @@ private RecyclerView recyclerView;
 
 private boolean isEmpty(){
 	if (mMovieList.isEmpty()) {
-		btnDel.setClickable(false);
-		btnDel.setEnabled(false);
+		btnDel.setVisibility(View.INVISIBLE);
+        //btnDel.setClickable(false);
+		//btnDel.setEnabled(false);
 
 		makeText(this,
 				getResources().getString(R.string.emptyList),
 				LENGTH_SHORT).show();
-		btnLoad.setClickable(true);
-		btnLoad.setEnabled(true);
+
+		btnLoad.setVisibility(View.VISIBLE);
+		//btnLoad.setClickable(true);
+		//btnLoad.setEnabled(true);
 		return true;
 	}
-	btnDel.setEnabled(true);
-	btnDel.setClickable(true);
+	btnDel.setVisibility(View.VISIBLE);
+//	btnDel.setEnabled(true);
+//	btnDel.setClickable(true);
 return false;
 }
 
@@ -165,15 +169,13 @@ return true;
 static private final String HTTPURL = "http://private-05248-rottentomatoes.apiary-mock.com/";
 public void btnLoadClicked(View view) {
 final Activity toastActivity = this;
-mLog.debug("btnLoadClicked");
+//mLog.debug("btnLoadClicked");
 progress.setMessage("Loading. . .");
 progress.show();
 final JSONObject GET = null;
 JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        new Response.Listener<JSONObject>() {
-       //new Listener<JsonObject>() {
            public void onResponse(JSONObject response) {
-          // public void onResponse(JsonObject response) {
                mLog.debug("onResponse:\t" + response.toString());
 	           mMovieList.clear();
                int numMovies = 0;
@@ -193,8 +195,9 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
 
 	           mMovieAdapter.notifyDataSetChanged();
                if (!isEmpty()) {
-                   btnLoad.setEnabled(false);
-                   btnLoad.setClickable(false);
+	               btnLoad.setVisibility(android.view.View.INVISIBLE);
+                   //btnLoad.setEnabled(false);
+                   //btnLoad.setClickable(false);
                }
                clearProgress();
                makeText(toastActivity,
@@ -205,22 +208,22 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        }//Listener
 
        ,new Response.ErrorListener() {
-@Override public void onErrorResponse (com.android.volley.VolleyError X){
-mLog.error("\nonErrorResponse\n");
-X.printStackTrace();
-mLog.error("\nonErrorResponse\n");
-clearProgress();
-}//onErrorResponse
-}//ErrorListener
-);//JsonObjectRequest
+		@Override public void onErrorResponse (com.android.volley.VolleyError X){
+		mLog.error("\nonErrorResponse\n");
+		X.printStackTrace();
+		clearProgress();
+		}//onErrorResponse
+		}//ErrorListener
+		);//JsonObjectRequest
 
-AppController.getInstance().addToRequestQueue(request);
 
+	AppController.getInstance().addToRequestQueue(request);
 }//btnLoadClicked
 
 public void btnDelClicked(View view) {
-	btnLoad.setClickable(true);
-	btnLoad.setEnabled(true);
+	btnLoad.setVisibility(View.VISIBLE);
+	//btnLoad.setClickable(true);
+	//btnLoad.setEnabled(true);
 
 	if ( isEmpty() ) return;
 
