@@ -1,3 +1,6 @@
+// Author: John "JD" Donaldson, April 2016
+// Resume: https://drive.google.com/open?id=1Pzf7oeqrpIEmzb0ZU3aRPRkRh9Us3ge0AkfsbUer3KM
+
 /* MOBILE CODE CHALLENGE
 		You're free to use any resource (internet / libraries / etc), but try to use as much native code as possible (Java for Android, Swift/Objective-C for iOS).
 
@@ -99,12 +102,12 @@ private RecyclerView recyclerView;
 	btnDel = (Button) findViewById(R.id.btnDel);
 	btnDel.setOnLongClickListener(new View.OnLongClickListener() {
 		@Override public boolean onLongClick(View v){
-			if (!isEmpty()) {
+			if (!isEmpty()){
 				mMovieList.clear();
 				mMovieAdapter.notifyDataSetChanged();
 				isEmpty();
 			}
-			return true;
+		return true;
 		}
 	});
 
@@ -112,7 +115,7 @@ private RecyclerView recyclerView;
 }//onCreate
 
 private boolean isEmpty(){
-	if (mMovieList.isEmpty()) {
+	if (mMovieList.isEmpty()){
 		btnDel.setVisibility(View.INVISIBLE);
 
 		makeText(this,
@@ -162,7 +165,7 @@ return true;
 }
 
 static private final String HTTPURL = "http://private-05248-rottentomatoes.apiary-mock.com/";
-public void btnLoadClicked(View view) {
+public void btnLoadClicked(View view){
 final Activity toastActivity = this;
 //mLog.debug("btnLoadClicked");
 progress.setMessage("Loading. . .");
@@ -172,8 +175,7 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
        new Response.Listener<JSONObject>() {
            public void onResponse(JSONObject response) {
                mLog.debug("onResponse:\t" + response.toString());
-	           mMovieList.clear();
-               int numMovies = 0;
+               int numMovies;
                try {
 	               //to view JSON use http://codebeautify.org/jsonviewer#
 	               JSONArray moviesArr = response.getJSONArray("movies");
@@ -181,16 +183,20 @@ JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
                    mLog.trace("JSON:\t" + moviesArr.toString());
 
                    numMovies = moviesArr.length();
-                   for (int i = 0; i < numMovies; i++) {
+	               mMovieList.clear();
+                   for (int i = 0; i < numMovies; i++){
 	                   mMovieList.add( Movie.fromJson( moviesArr.getJSONObject(i) ) );
                    }//for
                }//try
-               catch (JSONException X) { mLog.error("onResponse:\t" + X.getMessage()); }
-
+               catch (JSONException X) {
+	               mLog.error("onResponse:\t" + X.getMessage());
+	               numMovies = 0;
+	               mMovieList.clear();
+               }
 
 	           mMovieAdapter.notifyDataSetChanged();
-               if (!isEmpty()) { btnLoad.setVisibility(android.view.View.INVISIBLE); }
 
+               if ( !isEmpty() ){ btnLoad.setVisibility(View.INVISIBLE); }
                clearProgress();
                makeText(toastActivity,
                        Integer.toString(numMovies) + " movies loaded.",
