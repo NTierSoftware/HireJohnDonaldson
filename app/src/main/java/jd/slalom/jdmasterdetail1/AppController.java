@@ -10,8 +10,6 @@ import static com.android.volley.toolbox.Volley.newRequestQueue;
 
 public class AppController extends Application{
 
-public static final String TAG = AppController.class.getSimpleName();
-
 private RequestQueue mRequestQueue;
 private ImageLoader mImageLoader;
 
@@ -34,6 +32,9 @@ public ImageLoader getImageLoader(){
 	if (mImageLoader == null) { mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache()); }
 return this.mImageLoader;
 }
+
+
+public static final String TAG = AppController.class.getSimpleName();
 
 public <T> void addToRequestQueue(com.android.volley.Request<T> req, String tag){
 	// set the default tag if tag is empty

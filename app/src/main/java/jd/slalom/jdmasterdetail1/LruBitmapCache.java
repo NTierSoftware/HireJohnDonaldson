@@ -4,17 +4,12 @@ import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
 import com.android.volley.toolbox.ImageLoader.*;
-
+/* http://www.androidhive.info/2014/07/android-custom-listview-with-image-and-text-using-volley/ */
 public class LruBitmapCache extends LruCache<String, Bitmap> implements ImageCache{
 
-public static int getDefaultLruCacheSize(){
-	final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-	final int cacheSize = maxMemory / 8;
+public static int DefaultLruCacheSize = (int) (Runtime.getRuntime().maxMemory()  / (1024/8)) ;
 
-return cacheSize;
-}
-
-public LruBitmapCache(){ this(getDefaultLruCacheSize()); }
+public LruBitmapCache(){ this(DefaultLruCacheSize); }
 
 public LruBitmapCache(int sizeInKiloBytes){ super(sizeInKiloBytes); }
 
