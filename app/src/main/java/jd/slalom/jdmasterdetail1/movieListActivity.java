@@ -112,6 +112,7 @@ private NetworkStateReceiver networkStateReceiver;
 	recyclerView = (RecyclerView) findViewById( R.id.movie_list );
 
 	mMovieAdapter = new MovieAdapter( this, mMovieList );
+	mAppController.setMovieAdapter( mMovieAdapter );
 	recyclerView.setAdapter( mMovieAdapter );
 
 // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
@@ -119,7 +120,6 @@ private NetworkStateReceiver networkStateReceiver;
 	mTwoPane = ( findViewById( R.id.movie_detail_container ) != null );
 
 	btnLoad = (Button) findViewById( R.id.btnLoad );
-	//progress = new android.app.ProgressDialog( this );
 	btnDel = (Button) findViewById( R.id.btnDel );
 	btnDel.setOnLongClickListener( new View.OnLongClickListener(){
 		@Override public boolean onLongClick( View v ){
@@ -129,7 +129,7 @@ private NetworkStateReceiver networkStateReceiver;
 				isEmpty();
 			}
 			return true;
-		}//Long
+		}//onLongClick
 	}//View.OnLongClickListener
 	);//btnDel.setOnLongClickListener
 }//onCreate
@@ -146,7 +146,6 @@ return true;
 
 	try{ mContextInitializer.autoConfig(); } //I prefer autoConfig() over JoranConfigurator.doConfigure() so I don't need to find the file myself.
 	catch ( ch.qos.logback.core.joran.spi.JoranException X ){ X.printStackTrace(); }
-	//setMobileDataEnabled( true );
 }//onRestart()
 
 @Override public void onResume(){
@@ -154,7 +153,7 @@ return true;
 	registerReceiver(networkStateReceiver, new IntentFilter( ConnectivityManager.CONNECTIVITY_ACTION) );
 
 	progress = new android.app.ProgressDialog( this );
-	//EnableNetwork();
+
 	btnLoadClicked(null);
 }//onResume
 
@@ -177,22 +176,20 @@ return true;
 	mLog.trace( "onDestroy():\t" );
 	clearProgress();
 	mLoggerContext.stop();//flush log
-	//mUtility.close();
 }
 
 
-public void onNetworkAvailable(){
-	btnLoadClicked(null);
-	//Toast.makeText( this, "network Available", Toast.LENGTH_SHORT ).show();
-}
+public void onNetworkAvailable(){ btnLoadClicked(null); }
 
 public void onNetworkUnavailable(){
 	btnLoad.setVisibility( View.INVISIBLE );
 	btnDel.setVisibility( View.INVISIBLE );
 	Toast.makeText( this, "network Unavailable!!\nPlease Enable the network to Load!", Toast.LENGTH_SHORT ).show();
+	mAppController.cancelPendingRequests( AppController.TAG );
 }
 
 
+//http://www.androidhive.info/2014/07/android-custom-listview-with-image-and-text-using-volley/
 public void btnLoadClicked(View aView){
 	final Activity toastActivity = this;
 //mLog.debug("btnLoadClicked");
@@ -207,6 +204,7 @@ public void btnLoadClicked(View aView){
                        int numMovies;
                        try{ //to view JSON use http://codebeautify.org/jsonviewer#
                            JSONArray moviesArr = response.getJSONArray( "movies" );
+
                            //"Log the JSON to the console."
                            mLog.info( "JSON:\t" + moviesArr.toString() );
 
@@ -279,84 +277,3 @@ private void clearProgress(){ if ( progress != null ){ progress.dismiss(); } }
 
 }//class movieListActivity
 
-
-
-/*
-//http://stackoverflow.com/questions/13268302/alternative-setbutton
-class EnableNetworkalertDialogOnClickListener implements DialogInterface.OnClickListener{
-	public void onClick( DialogInterface dialog, int which ){
-		switch ( which ){
-		case DialogInterface.BUTTON_POSITIVE:
-			mAppController.setMobileData( true );
-			break;
-		case DialogInterface.BUTTON_NEGATIVE:
-		default:
-			dialog.cancel();
-			finish();
-		}//switch
-	}//onClick
-}//EnableNetworkalertDialogOnClickListener
-*/
-
-
-/*
-
-public void EnableNetwork(){
-	if ( !mAppController.isAndroidOnline() ){
-		//http://stackoverflow.com/questions/13268302/alternative-setbutton
-		class EnableNetworkalertDialogOnClickListener implements DialogInterface.OnClickListener{
-			public void onClick( DialogInterface dialog, int which ){
-				switch ( which ){
-				case DialogInterface.BUTTON_POSITIVE:
-					mAppController.setMobileData( true );
-					break;
-
-				case DialogInterface.BUTTON_NEUTRAL:
-					mAppController.setMobileData( true );
-					break;
-
-				case DialogInterface.BUTTON_NEGATIVE:
-				default:
-					dialog.cancel();
-					finish();
-				}//switch
-			}//onClick
-		}//EnableNetworkalertDialogOnClickListener
-
-		EnableNetworkalertDialogOnClickListener listener = new EnableNetworkalertDialogOnClickListener();
-
-		new android.app.AlertDialog.Builder( this )
-				.setMessage( "Please Enable Wifi or Data" )
-				.setCancelable( false )
-				.setPositiveButton( "Enable Wifi", listener )
-				.setNeutralButton( "Enable Data", listener )
-				.setNegativeButton( "Quit this application", listener )
-				.show();
-
-
-*/
-/*
-		new AlertDialog.Builder(this)
-				.setMessage("Please Enable High Accuracy GPS")
-				.setCancelable(false)
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(final DialogInterface dialog, final int id) {
-						//mActivity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-						startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-					}
-				})
-				.setNegativeButton("Cancel GAEL", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(final DialogInterface dialog, final int id) {
-						dialog.cancel();
-						finish();
-					}
-				})
-				.show();
-//   	builder.show();
-*//*
-
-	}//if
-}//EnableNetwork()
-*/
