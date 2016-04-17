@@ -25,7 +25,7 @@ super.onCreate(savedInstanceState);
 	Bundle bundle = getActivity().getIntent().getExtras();
 	if (bundle == null ) bundle = getArguments();
 
-	mItem = (Movie)bundle.getParcelable( Movie.parcelKey );
+	mItem = bundle.getParcelable( Movie.parcelKey );
 
 	CollapsingToolbarLayout appBarLayout =
 			(CollapsingToolbarLayout) getActivity().findViewById(R.id.toolbar_layout);

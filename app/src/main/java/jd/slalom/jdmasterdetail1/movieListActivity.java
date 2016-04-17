@@ -31,9 +31,15 @@ BONUS POINTS:
 Initially load the JSON into a data store and drive the UI from the data store.
 */
 
+//3rd party library/code/tools used:
+// Google Volley for network requests and image loading.
+// Logback for Android for excellent logging to logcat console and asynch file logging.
+
 package jd.slalom.jdmasterdetail1;
 
 import android.app.*;
+import android.content.*;
+import android.net.ConnectivityManager;
 import android.os.*;
 import android.support.design.widget.*;
 import android.support.v7.app.*;
@@ -53,186 +59,304 @@ import java.util.*;
 
 import ch.qos.logback.classic.*;
 import ch.qos.logback.classic.util.*;
+import jd.slalom.jdmasterdetail1.NetworkStateReceiver.*;
 
 
 import static android.widget.Toast.*;
 
+
 // An activity representing a list of movies. This activity has different presentations for handset and tablet-size devices.
 // On handsets, the activity presents a list of items, which when touched, lead to a {@link movieDetailActivity} representing
 // item details. On tablets, the activity presents the list of items and item details side-by-side using two vertical panes.
-public class movieListActivity extends AppCompatActivity{
-static private final Logger mLog = LoggerFactory.getLogger(movieListActivity.class);
-static private final LoggerContext mLoggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-static private final ContextInitializer mContextInitializer	= new ContextInitializer( mLoggerContext );
-
+public class movieListActivity extends AppCompatActivity implements NetworkStateReceiverListener{
 //Whether or not the activity is in two-pane mode, i.e. running on a tablet device.
 public boolean mTwoPane;
-private List<Movie> mMovieList = new ArrayList<>();
+
+static private final Logger mLog = LoggerFactory.getLogger( movieListActivity.class );
+static private final LoggerContext mLoggerContext = (LoggerContext) LoggerFactory
+		.getILoggerFactory();
+static private final ContextInitializer mContextInitializer = new ContextInitializer(
+		mLoggerContext );
+static private final String HTTPURL = "http://private-05248-rottentomatoes.apiary-mock.com/";
+static private final JSONObject GET = null;
+
+private List< Movie > mMovieList = new ArrayList<>();
 private MovieAdapter mMovieAdapter;
 private Button btnDel, btnLoad;
 private android.app.ProgressDialog progress;
 private RecyclerView recyclerView;
+private jd.slalom.jdmasterdetail1.AppController mAppController = AppController.getInstance();
+private NetworkStateReceiver networkStateReceiver;
 
-@Override protected void onCreate(Bundle savedInstanceState){
-	super.onCreate(savedInstanceState);
-	setContentView(R.layout.activity_movie_list);
 
-	Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-	setSupportActionBar(toolbar);
-	toolbar.setTitle(getTitle());
+@Override public void onCreate( Bundle savedInstanceState ){
+	super.onCreate( savedInstanceState );
 
-	FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-	fab.setOnClickListener(new View.OnClickListener(){
-		@Override public void onClick(View view){
-			Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_SHORT)
-					.setAction("Action", null).show();
+	networkStateReceiver = new NetworkStateReceiver();
+	networkStateReceiver.addListener( this );
+
+	setContentView( R.layout.activity_movie_list );
+
+	Toolbar toolbar = (Toolbar) findViewById( R.id.toolbar );
+	setSupportActionBar( toolbar );
+	toolbar.setTitle( getTitle() );
+
+	FloatingActionButton fab = (FloatingActionButton) findViewById( R.id.fab );
+	fab.setOnClickListener( new View.OnClickListener(){
+		@Override public void onClick( View view ){
+			Snackbar.make( view, "Replace with your own action", Snackbar.LENGTH_SHORT )
+			        .setAction( "Action", null ).show();
 		}//onClick
-	});
+	} );
 
-	recyclerView = (RecyclerView)findViewById(R.id.movie_list);
+	recyclerView = (RecyclerView) findViewById( R.id.movie_list );
 
-	mMovieAdapter = new MovieAdapter(this, mMovieList);
+	mMovieAdapter = new MovieAdapter( this, mMovieList );
 	recyclerView.setAdapter( mMovieAdapter );
 
 // The detail container view will be present only in the large-screen layouts (res/values-w900dp).
 // If this view is present, then the activity should be in two-pane mode.
-	mTwoPane = (findViewById(R.id.movie_detail_container) != null);
+	mTwoPane = ( findViewById( R.id.movie_detail_container ) != null );
 
-	btnLoad = (Button) findViewById(R.id.btnLoad);
-	progress = new android.app.ProgressDialog(this);
-	btnDel = (Button) findViewById(R.id.btnDel);
-	btnDel.setOnLongClickListener(new View.OnLongClickListener() {
-		@Override public boolean onLongClick(View v){
-			if (!isEmpty()){
+	btnLoad = (Button) findViewById( R.id.btnLoad );
+	//progress = new android.app.ProgressDialog( this );
+	btnDel = (Button) findViewById( R.id.btnDel );
+	btnDel.setOnLongClickListener( new View.OnLongClickListener(){
+		@Override public boolean onLongClick( View v ){
+			if ( !isEmpty() ){
 				mMovieList.clear();
 				mMovieAdapter.notifyDataSetChanged();
 				isEmpty();
 			}
-		return true;
-		}
-	});
-
-	btnLoadClicked(null);
+			return true;
+		}//Long
+	}//View.OnLongClickListener
+	);//btnDel.setOnLongClickListener
 }//onCreate
-
-private boolean isEmpty(){
-	if (mMovieList.isEmpty()){
-		btnDel.setVisibility(View.INVISIBLE);
-
-		makeText(this,
-				getResources().getString(R.string.emptyList),
-				LENGTH_SHORT).show();
-
-		btnLoad.setVisibility(View.VISIBLE);
-		return true;
-	}
-	btnDel.setVisibility(View.VISIBLE);
-return false;
-}
-
-@Override protected void onRestart(){
-	super.onRestart();
-	// Reload Logback log: http://stackoverflow.com/questions/3803184/setting-logback-appender-path-programmatically/3810936#3810936
-	mLoggerContext.reset();
-
-	try{ mContextInitializer.autoConfig(); } //I prefer autoConfig() over JoranConfigurator.doConfigure() so I don't need to find the file myself.
-	catch( ch.qos.logback.core.joran.spi.JoranException X ){ X.printStackTrace(); }
-	//setMobileDataEnabled( true );
-}//onRestart()
-
-//@Override protected void onStart(){ super.onStart(); }//onStart
-
-private void clearProgress() { if (progress != null) { progress.dismiss(); } }
 
 /* @Override public boolean onCreateOptionsMenu(Menu menu){
 	getMenuInflater().inflate(R.menu.main, menu);
 return true;
 } */
 
-@Override protected void onStop(){
+@Override public void onRestart(){
+	super.onRestart();
+	// Reload Logback log: http://stackoverflow.com/questions/3803184/setting-logback-appender-path-programmatically/3810936#3810936
+	mLoggerContext.reset();
+
+	try{ mContextInitializer.autoConfig(); } //I prefer autoConfig() over JoranConfigurator.doConfigure() so I don't need to find the file myself.
+	catch ( ch.qos.logback.core.joran.spi.JoranException X ){ X.printStackTrace(); }
+	//setMobileDataEnabled( true );
+}//onRestart()
+
+@Override public void onResume(){
+	super.onResume();
+	registerReceiver(networkStateReceiver, new IntentFilter( ConnectivityManager.CONNECTIVITY_ACTION) );
+
+	progress = new android.app.ProgressDialog( this );
+	//EnableNetwork();
+	btnLoadClicked(null);
+}//onResume
+
+
+@Override public void onPause(){
+	super.onPause();
+	unregisterReceiver( networkStateReceiver );
+}
+@Override public void onStop(){
 	super.onStop();
-	mLog.trace("onStop():\t");
+	mLog.trace( "onStop():\t" );
 	clearProgress();
 	progress = null;
 	mLoggerContext.stop();//flush log
 }// onStop()
 
+
 @Override public void onDestroy(){
 	super.onDestroy();
-	mLog.trace("onDestroy():\t");
+	mLog.trace( "onDestroy():\t" );
 	clearProgress();
 	mLoggerContext.stop();//flush log
 	//mUtility.close();
 }
 
 
-static private final String HTTPURL = "http://private-05248-rottentomatoes.apiary-mock.com/";
-static private final JSONObject GET = null;
+public void onNetworkAvailable(){
+	btnLoadClicked(null);
+	//Toast.makeText( this, "network Available", Toast.LENGTH_SHORT ).show();
+}
 
-public void btnLoadClicked(View view){
-final Activity toastActivity = this;
+public void onNetworkUnavailable(){
+	btnLoad.setVisibility( View.INVISIBLE );
+	btnDel.setVisibility( View.INVISIBLE );
+	Toast.makeText( this, "network Unavailable!!\nPlease Enable the network to Load!", Toast.LENGTH_SHORT ).show();
+}
+
+
+public void btnLoadClicked(View aView){
+	final Activity toastActivity = this;
 //mLog.debug("btnLoadClicked");
-progress.setMessage("Loading. . .");
-progress.show();
+	progress.setMessage( "Loading. . ." );
+	progress.show();
 
-JsonObjectRequest request = new JsonObjectRequest(HTTPURL, GET,
-       new Response.Listener<JSONObject>() {
-           public void onResponse(JSONObject response) {
-               //mLog.debug("onResponse:\t" + response.toString());
-               int numMovies;
-               try{ //to view JSON use http://codebeautify.org/jsonviewer#
-	               JSONArray moviesArr = response.getJSONArray("movies");
-                   //"Log the JSON to the console."
-                   mLog.info("JSON:\t" + moviesArr.toString());
+	JsonObjectRequest request = new JsonObjectRequest( HTTPURL, GET,
+               new Response.Listener< JSONObject >(){
+                   public void onResponse(
+                           JSONObject response ){
+                       //mLog.debug("onResponse:\t" + response.toString());
+                       int numMovies;
+                       try{ //to view JSON use http://codebeautify.org/jsonviewer#
+                           JSONArray moviesArr = response.getJSONArray( "movies" );
+                           //"Log the JSON to the console."
+                           mLog.info( "JSON:\t" + moviesArr.toString() );
 
-                   numMovies = moviesArr.length();
-	               mMovieList.clear();
-                   for (int i = 0; i < numMovies; i++){
-	                   mMovieList.add( Movie.fromJson( moviesArr.getJSONObject(i) ) );
-                   }//for
-               }//try
-               catch (JSONException X) {
-	               mLog.error("onResponse:\t" + X.getMessage());
-	               numMovies = 0;
-	               mMovieList.clear();
-               }
+                           numMovies = moviesArr.length();
+                           mMovieList.clear();
+                           for ( int i = 0; i < numMovies; i++ ){
+                               mMovieList.add( Movie.fromJson( moviesArr.getJSONObject(i ) ) );
+                           }//for
+                       }//try
+                       catch ( JSONException X ){
+                           mLog.error( "onResponse:\t" + X.getMessage() );
+                           numMovies = 0;
+                           mMovieList.clear();
+                       }
 
-	           mMovieAdapter.notifyDataSetChanged();
+                       mMovieAdapter.notifyDataSetChanged();
 
-               if ( !isEmpty() ){ btnLoad.setVisibility(View.INVISIBLE); }
-               clearProgress();
-               makeText(toastActivity,
-                       Integer.toString(numMovies) + " movies loaded.",
-                       LENGTH_SHORT).show();
+                       if ( !isEmpty() ) btnLoad.setVisibility( View.INVISIBLE );
+                       clearProgress();
+                       makeText( toastActivity,
+                                 Integer.toString( numMovies ) + " movies loaded.",
+                                 LENGTH_SHORT ).show();
 
-           }//onResponse
-       }//Listener
+                   }//onResponse
+               }//Listener
 
-       ,new Response.ErrorListener() {
-			@Override public void onErrorResponse (com.android.volley.VolleyError X){
-				mLog.error("\nonErrorResponse\n");
-				X.printStackTrace();
-				clearProgress();
-			}//onErrorResponse
-		}//ErrorListener
+			, new Response.ErrorListener(){
+		@Override public void onErrorResponse( com.android.volley.VolleyError X ){
+			mLog.error( "\nonErrorResponse\n" );
+			X.printStackTrace();
+			clearProgress();
+		}//onErrorResponse
+	}//ErrorListener
 	);//JsonObjectRequest
 
 
-	AppController.getInstance().addToRequestQueue(request);
+	mAppController.addToRequestQueue( request );
 }//btnLoadClicked
 
-public void btnDelClicked(View view) {
-	btnLoad.setVisibility(View.VISIBLE);
+//@Override protected void onStart(){ super.onStart(); }//onStart
+
+public void btnDelClicked( View view ){
+	btnLoad.setVisibility( View.VISIBLE );
 
 	if ( isEmpty() ) return;
 
-	makeText(this,
-			getResources().getString(R.string.deleteAll ),
-			LENGTH_SHORT).show();
+	makeText( this, getResources().getString( R.string.deleteAll ), LENGTH_SHORT ).show();
 
-	mMovieList.remove(0);
+	mMovieList.remove( 0 );
 	mMovieAdapter.notifyDataSetChanged();
 	isEmpty();
 }//btnDelClicked
 
+private boolean isEmpty(){
+	if ( mMovieList.isEmpty() ){
+		btnDel.setVisibility( View.INVISIBLE );
+
+		makeText( this,
+		          getResources().getString( R.string.emptyList ),
+		          LENGTH_SHORT ).show();
+
+		btnLoad.setVisibility( View.VISIBLE );
+		return true;
+	}
+	btnDel.setVisibility( View.VISIBLE );
+	return false;
+}
+
+private void clearProgress(){ if ( progress != null ){ progress.dismiss(); } }
+
 }//class movieListActivity
+
+
+
+/*
+//http://stackoverflow.com/questions/13268302/alternative-setbutton
+class EnableNetworkalertDialogOnClickListener implements DialogInterface.OnClickListener{
+	public void onClick( DialogInterface dialog, int which ){
+		switch ( which ){
+		case DialogInterface.BUTTON_POSITIVE:
+			mAppController.setMobileData( true );
+			break;
+		case DialogInterface.BUTTON_NEGATIVE:
+		default:
+			dialog.cancel();
+			finish();
+		}//switch
+	}//onClick
+}//EnableNetworkalertDialogOnClickListener
+*/
+
+
+/*
+
+public void EnableNetwork(){
+	if ( !mAppController.isAndroidOnline() ){
+		//http://stackoverflow.com/questions/13268302/alternative-setbutton
+		class EnableNetworkalertDialogOnClickListener implements DialogInterface.OnClickListener{
+			public void onClick( DialogInterface dialog, int which ){
+				switch ( which ){
+				case DialogInterface.BUTTON_POSITIVE:
+					mAppController.setMobileData( true );
+					break;
+
+				case DialogInterface.BUTTON_NEUTRAL:
+					mAppController.setMobileData( true );
+					break;
+
+				case DialogInterface.BUTTON_NEGATIVE:
+				default:
+					dialog.cancel();
+					finish();
+				}//switch
+			}//onClick
+		}//EnableNetworkalertDialogOnClickListener
+
+		EnableNetworkalertDialogOnClickListener listener = new EnableNetworkalertDialogOnClickListener();
+
+		new android.app.AlertDialog.Builder( this )
+				.setMessage( "Please Enable Wifi or Data" )
+				.setCancelable( false )
+				.setPositiveButton( "Enable Wifi", listener )
+				.setNeutralButton( "Enable Data", listener )
+				.setNegativeButton( "Quit this application", listener )
+				.show();
+
+
+*/
+/*
+		new AlertDialog.Builder(this)
+				.setMessage("Please Enable High Accuracy GPS")
+				.setCancelable(false)
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(final DialogInterface dialog, final int id) {
+						//mActivity.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+						startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+					}
+				})
+				.setNegativeButton("Cancel GAEL", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(final DialogInterface dialog, final int id) {
+						dialog.cancel();
+						finish();
+					}
+				})
+				.show();
+//   	builder.show();
+*//*
+
+	}//if
+}//EnableNetwork()
+*/
